@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include <math.h>
+#include <errno.h>
 #include "ll.h"
 
 error read_physical_block(disk_id id, block b, uint32_t num);
@@ -8,7 +8,7 @@ error write_physical_block(disk_id id, block b, uint32_t num);
 
 unsigned char* to_little_endian(uint32_t num)
 {
-	unsigned char t[4];
+	unsigned char* t = malloc (sizeof (char) *  4);
 	int i;
 	for (i = 0; i < 4; i = i +1)
 	{
@@ -50,6 +50,8 @@ error read_physical_block(disk_id id, block b, uint32_t num)
 
 error write_physical_block(disk_id id, block b, uint32_t num)
 {
+	lseek(id.fd,(num*1024),SEEK_SET);
+	write(id.fd,b->data,1024);
 	error e;
 	return e;
 }

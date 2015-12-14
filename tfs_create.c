@@ -1,5 +1,3 @@
-#include <stdio.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include "ll.h"
@@ -10,14 +8,18 @@ int tfs_create(uint32_t size, char* name)
 {
 	int i;
 	disk_id dk;
-	dk.fd = open(name, O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+	dk.fd = open(name, O_RDWR|O_TRUNC|O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+	printf("FD => %d\n",dk.fd);
 	block b = malloc (sizeof (struct block));
 	unsigned char* t = malloc (4 * sizeof (char));
 	t = to_little_endian(size);
 	for (i = 0; i < 4; i = i + 1)
 	{
 		b->data[i] = t[i];
-		printf("%u", (unsigned int)b->data[i]);
+	}
+	for (i = 4; i < 1024; i = i + 1)
+	{
+		b->data[i] = 0;
 	}
 	write_block(dk, b, 0);
 	block bb = malloc (sizeof (struct block));
@@ -35,7 +37,6 @@ int tfs_create(uint32_t size, char* name)
 
 int main(int argc, char* argv[])
 {
-	printf("hello");
 	int xarg = 1;
 	uint32_t size = 1024;
 	char* filename = "disk.tfs";

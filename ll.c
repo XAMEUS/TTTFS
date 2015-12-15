@@ -18,19 +18,6 @@ unsigned char* to_little_endian(uint32_t num)
 	return t;
 }
 
-/*uint32_t to_little_endian(uint32_t num)
-{
-	unsigned char* t = &num;
-	uint32_t tmp = num;
-	int i;
-	for (i = 0; i < 4; i = i +1)
-	{
-		t[i] = tmp % 256;
-		tmp = tmp / 256;
-	}
-	return num;
-}*/
-
 uint32_t to_uint32_t(unsigned char* c)
 {
 	uint32_t num = 0;

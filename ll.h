@@ -22,7 +22,7 @@ typedef struct disk_id {
 } disk_id;
 
 /**
-* \struct disk_id
+* \struct block
 * \brief Objet block contenant un tableau de 1024 octets.
 */
 struct block {

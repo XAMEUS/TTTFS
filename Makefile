@@ -1,16 +1,19 @@
 CC = gcc
 CFLAGS = -Wall
-EXEC = tfs_create
+EXEC = all
 HEADERS = $(wildcard *.h)
 OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))
 
-all: $(EXEC)
-
-$(EXEC): $(OBJECTS)
-	$(CC) -o $@ $^ '-lm'
+all: tfs_create test
 
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -c $< '-lm'
+
+tfs_create: ll.o tfs_create.c
+	gcc ll.o tfs_create.c -o tfs_create '-lm'
+
+test: ll.o test.c
+	gcc ll.o test.c -o test '-lm'
 
 clean:
 	rm -f $(OBJECTS)

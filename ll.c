@@ -31,6 +31,8 @@ uint32_t to_uint32_t(unsigned char* c)
 
 error read_physical_block(disk_id id, block b, uint32_t num)
 {
+	lseek(id.fd,(num*1024),SEEK_SET);
+	read(id.fd,b->data,1024);
 	error e;
 	return e;
 }

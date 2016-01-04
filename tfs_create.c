@@ -1,5 +1,3 @@
-#include <sys/stat.h>
-#include <fcntl.h>
 #include "ll.h"
 
 int tfs_create(uint32_t size, char* name);

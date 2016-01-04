@@ -1,6 +1,4 @@
 #include <stdio.h>
+#include <errno.h>
 
-typedef struct error {
-	int code;
-	char* msg;
-} error;
+typedef int error;

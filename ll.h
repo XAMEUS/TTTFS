@@ -13,13 +13,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <unistd.h>
+#include <math.h>
 #include "error.h"
-
-
-typedef struct disk_id {
-	int fd;
-} disk_id;
 
 /**
 * \struct block
@@ -28,8 +26,13 @@ typedef struct disk_id {
 struct block {
 	unsigned char data[1024];
 };
-
 typedef struct block* block;
+
+typedef struct disk_id {
+	int fd;
+	block b0;
+} disk_id;
+
 
 //================================================================================
 // Basic API

@@ -1,6 +1,5 @@
-#include <math.h>
-#include <errno.h>
 #include "ll.h"
+#include "error.h"
 
 error read_physical_block(disk_id id, block b, uint32_t num);
 
@@ -31,18 +30,20 @@ uint32_t to_uint32_t(unsigned char* c)
 
 error read_physical_block(disk_id id, block b, uint32_t num)
 {
-	lseek(id.fd,(num*1024),SEEK_SET);
+	errno = 0;
+	int e = lseek(id.fd,(num*1024),SEEK_SET);
+	if (e == -1) return errno;
 	read(id.fd,b->data,1024);
-	error e;
-	return e;
+	return errno;
 }
 
 error write_physical_block(disk_id id, block b, uint32_t num)
 {
-	lseek(id.fd,(num*1024),SEEK_SET);
+	errno = 0;
+	int e = lseek(id.fd,(num*1024),SEEK_SET);
+	if (e == -1) return errno;
 	write(id.fd,b->data,1024);
-	error e;
-	return e;
+	return errno;
 }
 
 
@@ -54,4 +55,30 @@ error read_block(disk_id id, block b, uint32_t num)
 error write_block(disk_id id, block b, uint32_t num)
 {
 	return write_physical_block(id, b, num);
+}
+
+error start_disk(char* name, disk_id* id)
+{
+	errno = 0;
+	id->fd = open(name, O_RDWR);
+	if (id->fd < 0) return errno;
+	block b = malloc (sizeof (struct block));
+	if (b == NULL) return 134;
+	error e = read_block(*id, b, 0);
+	if (e) return e;
+	id->b0 = b;
+	return 0;
+}
+
+error stop_disk(disk_id id)
+{
+	errno = 0;
+	close(id.fd);
+	return errno;
+}
+
+
+error sync_disk(disk_id id)
+{
+	return write_block(id, id.b0, 0);
 }

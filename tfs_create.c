@@ -9,7 +9,6 @@ int tfs_create(uint32_t size, char* name)
 	int i;
 	disk_id dk;
 	dk.fd = open(name, O_RDWR|O_TRUNC|O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
-	printf("FD => %d\n",dk.fd);
 	block b = malloc (sizeof (struct block));
 	unsigned char* t = malloc (4 * sizeof (char));
 	t = to_little_endian(size);

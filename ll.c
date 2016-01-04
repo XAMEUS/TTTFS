@@ -28,6 +28,17 @@ uint32_t to_uint32_t(unsigned char* c)
 	return num;
 }
 
+uint32_t read_uint32_t(block b, uint32_t pos)
+{
+	int i;
+	unsigned char* t = malloc (4 * sizeof (char));
+	for (i = pos*4; i < pos*4+4; i = i + 1)
+	{
+		t[i]= b->data[i];
+	}
+	return to_uint32_t(t);
+}
+
 error read_physical_block(disk_id id, block b, uint32_t num)
 {
 	errno = 0;

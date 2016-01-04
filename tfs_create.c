@@ -50,6 +50,7 @@ int main(int argc, char* argv[])
 			else
 			{
 				fprintf(stderr, "-s doit être suivi d'un entier");
+				return 1;
 			}
 		}
 		else

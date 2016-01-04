@@ -100,6 +100,15 @@ unsigned char* to_little_endian(uint32_t num);
 * \fn uint32_t to_uint32_t(unsigned char* c)
 * \brief converti tableau de 4 octets en little endian en uint32_t.
 * \param c le tableau à convertir.
-* \return uint32_t l'entier correspondant.
+* \return uint32_t l'entier correspondant
 */
 uint32_t to_uint32_t(unsigned char* c);
+
+/**
+* \fn uint32_t read_uint32_t(block b, uint32_t pos)
+* \brief lit 4 octets à la position donnée et renvoie l'entier correpondant
+* \param b le block
+* \param pos la position
+* \return uint32_t l'entier trouvé
+*/
+uint32_t read_uint32_t(block b, uint32_t pos);

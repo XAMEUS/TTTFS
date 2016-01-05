@@ -30,13 +30,27 @@ uint32_t to_uint32_t(unsigned char* c)
 
 uint32_t read_uint32_t(block b, uint32_t pos)
 {
+	if (pos > 255) return BLOCK_OUT_OF_BOUNDS;
 	int i;
 	unsigned char* t = malloc (4 * sizeof (char));
-	for (i = pos*4; i < pos*4+4; i = i + 1)
+	for (i = 0; i < 4; i = i + 1)
 	{
-		t[i]= b->data[i];
+		t[i]= b->data[i+pos*4];
 	}
 	return to_uint32_t(t);
+}
+
+error write_uint32_t(block b, uint32_t pos, uint32_t n)
+{
+	if (pos > 255) return BLOCK_OUT_OF_BOUNDS;
+	int i;
+	unsigned char* t = malloc (4 * sizeof (char));
+	t = to_little_endian(n);
+	for (i = 0; i < 4; i = i + 1)
+	{
+		b->data[i+pos*4] = t[i];
+	}
+	return 0;
 }
 
 error read_physical_block(disk_id id, block b, uint32_t num)

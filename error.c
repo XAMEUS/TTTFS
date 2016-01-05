@@ -135,5 +135,8 @@ char *errors_list[] = {
 	"State not recoverable",
 	"Operation not possible due to RF-kill",
 	"Memory page has hardware error",
-/*134*/	"Malloc error"
+/*134*/	"Malloc error",
+	"Position block error, out of bounds",
+	"Block b0 is full",
+	"Cannot partition anymore, no more free space"
 };

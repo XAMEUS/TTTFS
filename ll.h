@@ -112,3 +112,5 @@ uint32_t to_uint32_t(unsigned char* c);
 * \return uint32_t l'entier trouvé
 */
 uint32_t read_uint32_t(block b, uint32_t pos);
+
+error write_uint32_t(block b, uint32_t pos, uint32_t n);

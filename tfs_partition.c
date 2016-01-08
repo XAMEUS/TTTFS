@@ -6,8 +6,6 @@ int tfs_partition(uint32_t size, disk_id* id)
 {
 	uint32_t volume = read_uint32_t(id->b0, 0);
 	uint32_t partitions = read_uint32_t(id->b0, 1);
-	printf("%u\n", volume);
-	printf("%u\n", partitions);
 	uint32_t partitions_available = 254 - partitions;
 	if (partitions_available == 0)
 		return B0_FULL;

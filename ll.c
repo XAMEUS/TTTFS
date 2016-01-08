@@ -107,3 +107,9 @@ error sync_disk(disk_id id)
 {
 	return write_block(id, id.b0, 0);
 }
+
+void myfree(block b)
+{	
+	int i;
+	for(i = 0; i < 1024; i++) b->data[i] = 0;
+}

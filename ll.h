@@ -126,3 +126,8 @@ uint32_t to_uint32_t(unsigned char* c);
 uint32_t read_uint32_t(block b, uint32_t pos);
 
 error write_uint32_t(block b, uint32_t pos, uint32_t n);
+
+/**
+* \brief Custom free
+*/
+void myfree(block b);

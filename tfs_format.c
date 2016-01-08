@@ -18,7 +18,7 @@ int tfs_format(uint32_t partition, uint32_t TTTFS_VOLUME_MAX_FILE_COUNT, char* n
 	uint32_t TTTFS_VOLUME_BLOCK_COUNT = read_uint32_t(dk.b0, i);
 	if (TTTFS_VOLUME_BLOCK_COUNT <= TTTFS_VOLUME_MAX_FILE_COUNT/16 + TTTFS_VOLUME_MAX_FILE_COUNT + 2)
 		return 139;
-	uint32_t TTTFS_VOLUME_FILE_TABLE_COUNT = (TTTFS_VOLUME_MAX_FILE_COUNT / 16) + 1;
+	uint32_t TTTFS_VOLUME_FILE_TABLE_COUNT = (TTTFS_VOLUME_MAX_FILE_COUNT + 15) / 16;
 	uint32_t TTTFS_VOLUME_FREE_BLOCK_COUNT = TTTFS_VOLUME_BLOCK_COUNT - 2 - TTTFS_VOLUME_FILE_TABLE_COUNT;
 	uint32_t TTTFS_VOLUME_FIRST_FREE_BLOCK = 2 + TTTFS_VOLUME_FILE_TABLE_COUNT;
 	uint32_t TTTFS_VOLUME_FREE_FILE_COUNT = TTTFS_VOLUME_MAX_FILE_COUNT - 1;
@@ -44,7 +44,7 @@ int tfs_format(uint32_t partition, uint32_t TTTFS_VOLUME_MAX_FILE_COUNT, char* n
 	if (e) return e;
 	
 	write_block(dk, p0, pos);
-	free(p0);
+	myfree(p0);
 	
 	block file_table = malloc (sizeof (struct block));
 	// tfs_size, taille des fichiers en octet
@@ -61,20 +61,19 @@ int tfs_format(uint32_t partition, uint32_t TTTFS_VOLUME_MAX_FILE_COUNT, char* n
 	{
 		if (i != 0)
 		{
-			free(file_table);
-			file_table = malloc (sizeof (struct block));
+			myfree(file_table);
 		}
 		int c = 15; // nombre de fichier dans chaque file table
-		if (i == TTTFS_VOLUME_FILE_TABLE_COUNT - 1) c = TTTFS_VOLUME_MAX_FILE_COUNT % 16;
+		if (i == TTTFS_VOLUME_FILE_TABLE_COUNT - 1) c = (TTTFS_VOLUME_MAX_FILE_COUNT - 1) % 16;
 		for (j = 0; j <= c; j++)
 		{
 			write_uint32_t(file_table, j * 16 + 15, i * 16 + j + 1);
 		}
 		if (i == TTTFS_VOLUME_FILE_TABLE_COUNT - 1)
-			write_uint32_t(file_table, j * 16 + 15, i * 16 + j);
+			write_uint32_t(file_table, (j-1) * 16 + 15, i * 16 + j - 1);
 		write_block(dk, file_table, pos + i + 1);
 	}
-	free(file_table);
+	myfree(file_table);
 	
 	block root = malloc (sizeof (struct block));
 	write_uint32_t(root, 0, 0);
@@ -85,18 +84,19 @@ int tfs_format(uint32_t partition, uint32_t TTTFS_VOLUME_MAX_FILE_COUNT, char* n
 	root->data[37] = '.';
 	root->data[38] = '\0';
 	write_block(dk, root, pos + TTTFS_VOLUME_FIRST_FREE_BLOCK - 1);
+	myfree(root);
 	
 	for (i = TTTFS_VOLUME_FIRST_FREE_BLOCK; i < TTTFS_VOLUME_BLOCK_COUNT - 1; i++)
 	{
 		block free_block = malloc (sizeof (struct block));
 		write_uint32_t(free_block, 255, i + 1);
 		write_block(dk, free_block, pos + i);
-		free(free_block);
+		myfree(free_block);
 	}
 	block free_block = malloc (sizeof (struct block));
 	write_uint32_t(free_block, 255, i);
 	write_block(dk, free_block, pos + i);
-	free(free_block);
+	myfree(free_block);
 	
 	return 0;
 }

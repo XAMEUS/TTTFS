@@ -107,17 +107,17 @@ int main(int argc, char* argv[])
 	uint32_t partition = 0;
 	uint32_t max_file = 16;
 	char* filename = "disk.tfs";
-	if (strcmp(argv[xarg], "-p") == 0)
+	if (argc >= 2 && strcmp(argv[xarg], "-p") == 0)
 	{
 		partition = atoi(argv[xarg+1]);
 		xarg += 2;
 	}
-	if (strcmp(argv[xarg], "-mf") == 0)
+	if (argc - xarg >= 2 && strcmp(argv[xarg], "-mf") == 0)
 	{
 		partition = atoi(argv[xarg+1]);
 		xarg += 2;
 	}
-	if (xarg < argc)
+	if (argc - xarg > 0 && xarg < argc)
 	{
 		filename = argv[argc - 1];
 	}

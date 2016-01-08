@@ -140,5 +140,6 @@ char *errors_list[] = {
 	"Block b0 is full",
 	"Cannot partition anymore, no more free space",
 	"Partition doesn't exists",
-	"Format error: not enough space in this partition"
+	"Format error: not enough space in this partition",
+	"Cannot free this block, already free."
 };

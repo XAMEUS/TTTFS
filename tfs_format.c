@@ -10,12 +10,8 @@ int tfs_format(uint32_t partition, uint32_t TTTFS_VOLUME_MAX_FILE_COUNT, char* n
 	uint32_t partitions = read_uint32_t(dk.b0, 1);
 	if (partitions < partition + 1)
 		return 138;
-	int pos = 1;
-	for(i = 2; i < 2 + partition; i++)
-	{
-		pos += read_uint32_t(dk.b0, i);
-	}
-	uint32_t TTTFS_VOLUME_BLOCK_COUNT = read_uint32_t(dk.b0, i);
+	int pos = dk.pos_partition[partition];
+	uint32_t TTTFS_VOLUME_BLOCK_COUNT = read_uint32_t(dk.b0, partition + 2);
 	if (TTTFS_VOLUME_BLOCK_COUNT <= TTTFS_VOLUME_MAX_FILE_COUNT/16 + TTTFS_VOLUME_MAX_FILE_COUNT + 2)
 		return 139;
 	uint32_t TTTFS_VOLUME_FILE_TABLE_COUNT = (TTTFS_VOLUME_MAX_FILE_COUNT + 15) / 16;

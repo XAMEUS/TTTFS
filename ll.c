@@ -92,6 +92,14 @@ error start_disk(char* name, disk_id* id)
 	error e = read_block(*id, b, 0);
 	if (e) return e;
 	id->b0 = b;
+	
+	int pos = 1; int i;
+	for(i = 0; i < 254; i++)
+	{
+		id->pos_partition[i] = pos;
+		pos += read_uint32_t(id->b0, i + 2);
+	}
+	
 	return 0;
 }
 

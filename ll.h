@@ -41,8 +41,9 @@ struct block {
 typedef struct block* block;
 
 typedef struct disk_id {
-	int fd;
+	uint32_t fd;
 	block b0;
+	uint32_t pos_partition[254];
 } disk_id;
 
 

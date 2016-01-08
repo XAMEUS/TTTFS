@@ -138,5 +138,7 @@ char *errors_list[] = {
 /*134*/	"Malloc error",
 	"Position block error, out of bounds",
 	"Block b0 is full",
-	"Cannot partition anymore, no more free space"
+	"Cannot partition anymore, no more free space",
+	"Partition doesn't exists",
+	"Format error: not enough space in this partition"
 };

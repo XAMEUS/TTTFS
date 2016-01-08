@@ -19,6 +19,18 @@
 #include <math.h>
 #include "error.h"
 
+#define TTTFS_MAGIC_NUMBER 0x31534654
+#define TTTFS_VOLUME_BLOCK_SIZE 1024
+
+#define TFS_REGULAR 0
+#define TFS_DIRECTORY 1 
+#define TFS_PSEUDO 2
+
+/* PSEUDO FILE */
+#define TFS_DATE 0
+#define TFS_DISK 1
+
+
 /**
 * \struct block
 * \brief Objet block contenant un tableau de 1024 octets.

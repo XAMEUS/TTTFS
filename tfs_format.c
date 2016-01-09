@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
 	}
 	if (argc - xarg >= 2 && strcmp(argv[xarg], "-mf") == 0)
 	{
-		partition = atoi(argv[xarg+1]);
+		max_file = atoi(argv[xarg+1]);
 		xarg += 2;
 	}
 	if (argc - xarg > 0 && xarg < argc)

@@ -13,3 +13,5 @@
 #define FILE_ALREADY_FREE 144
 
 typedef int error;
+
+char* error_description(error e);

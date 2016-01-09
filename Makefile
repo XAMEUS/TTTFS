@@ -4,7 +4,7 @@ EXEC = all
 HEADERS = $(wildcard *.h)
 OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))
 
-all: tfs_create tfs_partition tfs_analyse tfs_format
+all: tfs_create tfs_partition tfs_analyse tfs_format test
 
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -c $< '-lm'
@@ -20,6 +20,9 @@ tfs_analyse: ll.o error.o tfs_analyse.c
 
 tfs_format: ll.o error.o tfs_format.c stdltfs.o
 	gcc ll.o tfs_format.c -o tfs_format '-lm' -Wall
+
+test: ll.o error.o stdltfs.o
+	gcc ll.o stdltfs.o error.o test.c -o out '-lm' -Wall
 
 disk:
 	./tfs_create; ./tfs_partition -p 32; ./tfs_format

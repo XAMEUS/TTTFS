@@ -1,9 +1,8 @@
 #include "stdltfs.h"
-#include "ll.h"
-#include "error.h"
 
-int is_free(disk_id id, uint32_t pos_par, uint32_t free_block, uint32_t pos)
+int is_free(disk_id id, uint32_t par, uint32_t free_block, uint32_t pos)
 {
+	uint32_t pos_par = id.pos_partition[par];
 	uint32_t next_free_block;
 	block b = malloc (sizeof (struct block));
 	read_block(id, b, pos_par + free_block);
@@ -32,7 +31,7 @@ error free_block(disk_id id, uint32_t par, uint32_t pos)
 	uint32_t TTTFS_VOLUME_FIRST_FREE_BLOCK = read_uint32_t(p0, 4);
 	if (TTTFS_VOLUME_BLOCK_COUNT < pos)
 		return BLOCK_OUT_OF_BOUNDS;
-	if (is_free(id, id.pos_partition[par], TTTFS_VOLUME_FIRST_FREE_BLOCK, pos))
+	if (is_free(id, par, TTTFS_VOLUME_FIRST_FREE_BLOCK, pos))
 		return BLOCK_ALREADY_FREE;
 	
 	block b = malloc (sizeof (struct block));
@@ -71,7 +70,7 @@ error alocate_block(disk_id id, uint32_t par)
 	return 0;
 }
 
-error create_file(disk_id id, uint32_t par, uint32_t type, uint32_t subtype)
+error create_file(disk_id id, uint32_t par, uint32_t dir, uint32_t type, uint32_t subtype)
 {
     if (par >= read_uint32_t(id.b0, 1))
 		return PARTITION_NOT_FOUND;
@@ -94,29 +93,35 @@ error create_file(disk_id id, uint32_t par, uint32_t type, uint32_t subtype)
     write_uint32_t(file_table, (TTTFS_VOLUME_FIRST_FREE_FILE%16) * 16 + 1, type);
     write_uint32_t(file_table, (TTTFS_VOLUME_FIRST_FREE_FILE%16) * 16 + 2, subtype);
     write_uint32_t(file_table, (TTTFS_VOLUME_FIRST_FREE_FILE%16) * 16 + 3, TTTFS_VOLUME_FIRST_FREE_BLOCK);
-    alocate_block(id, par);
+    write_uint32_t(file_table, (TTTFS_VOLUME_FIRST_FREE_FILE%16) * 16 + 15, 0);
+	
+	alocate_block(id, par);
+	if ((e = read_block(id, p0, id.pos_partition[par]))) return e;
+	
     
     if (type == 1)
     {
         block root = malloc (sizeof (struct block));
-	    write_uint32_t(root, 0, 0);
+	    write_uint32_t(root, 0, TTTFS_VOLUME_FIRST_FREE_FILE);
 	    root->data[4] = '.';
 	    root->data[5] = '\0';
-	    write_uint32_t(root, 8, 0);
+	    write_uint32_t(root, 8, dir);
 	    root->data[36] = '.';
 	    root->data[37] = '.';
 	    root->data[38] = '\0';
 	    write_block(id, root, id.pos_partition[par] + TTTFS_VOLUME_FIRST_FREE_BLOCK);
     }
 
+	write_uint32_t(p0, 6, TTTFS_VOLUME_FREE_FILE_COUNT - 1);
     write_uint32_t(p0, 7, next_free);
     write_block(id, p0, id.pos_partition[par]);
     write_block(id, file_table, id.pos_partition[par] + TTTFS_VOLUME_FIRST_FREE_FILE / 16 + 1);
     return 0;
 }
 
-int is_free_file(disk_id id, uint32_t pos_par, uint32_t free_file, uint32_t pos)
+int is_free_file(disk_id id, uint32_t par, uint32_t free_file, uint32_t pos)
 {
+	uint32_t pos_par = id.pos_partition[par];
     uint32_t next_free_file;
 	block file_table = malloc (sizeof (struct block));
 	read_block(id, file_table, pos_par + free_file / 16 + 1);
@@ -141,7 +146,6 @@ error remove_file(disk_id id, uint32_t par, uint32_t pos)
 	error e;
 	if ((e = read_block(id, p0, id.pos_partition[par]))) return e;
     
-	uint32_t TTTFS_VOLUME_FIRST_FREE_BLOCK = read_uint32_t(p0, 4);
 	uint32_t TTTFS_VOLUME_MAX_FILE_COUNT = read_uint32_t(p0, 5);
 	uint32_t TTTFS_VOLUME_FREE_FILE_COUNT = read_uint32_t(p0, 6);
 	uint32_t TTTFS_VOLUME_FIRST_FREE_FILE = read_uint32_t(p0, 7);
@@ -154,37 +158,50 @@ error remove_file(disk_id id, uint32_t par, uint32_t pos)
     if ((e = read_block(id, file_table, id.pos_partition[par] + pos / 16 + 1))) return e;
     uint32_t size = read_uint32_t(file_table, (pos%16) * 16);
     int i;
-    for (i = 0; i <= size / 1024; i++)
+    for (i = 0; i <= size / 1024 && i < 10; i++)
     {
         free_block(id, par, (pos%16) * 16 + 3 + i);
     }
-    
-	/*
-    if (type == 1) size = 64;
-    uint32_t next_free = read_uint32_t(file_table, (TTTFS_VOLUME_FIRST_FREE_FILE%16) * 16 + 15);
-    write_uint32_t(file_table, (TTTFS_VOLUME_FIRST_FREE_FILE%16) * 16, size);
-    write_uint32_t(file_table, (TTTFS_VOLUME_FIRST_FREE_FILE%16) * 16 + 1, type);
-    write_uint32_t(file_table, (TTTFS_VOLUME_FIRST_FREE_FILE%16) * 16 + 2, subtype);
-    write_uint32_t(file_table, (TTTFS_VOLUME_FIRST_FREE_FILE%16) * 16 + 3, TTTFS_VOLUME_FIRST_FREE_BLOCK);
-    alocate_block(id, par);
-    
-    if (type == 1)
-    {
-        block root = malloc (sizeof (struct block));
-	    write_uint32_t(root, 0, 0);
-	    root->data[4] = '.';
-	    root->data[5] = '\0';
-	    write_uint32_t(root, 8, 0);
-	    root->data[36] = '.';
-	    root->data[37] = '.';
-	    root->data[38] = '\0';
-	    write_block(id, root, id.pos_partition[par] + TTTFS_VOLUME_FIRST_FREE_BLOCK);
-    }
+	if (size / 1024 > 10)
+	{
+		block indirect1 = malloc (sizeof (struct block));
+	    if ((e = read_block(id, indirect1, id.pos_partition[par] + pos / 16 + 13))) return e;
+		for (i = 0; i <= size / 1024 - 10 && i < 256; i++)
+		{
+		    free_block(id, par, read_uint32_t(indirect1, i));
+		}
+	    free_block(id, par, id.pos_partition[par] + pos / 16 + 13);
+	}
+	if (size / 1024 > 266)
+	{
+		block indirect2 = malloc (sizeof (struct block));
+	    if ((e = read_block(id, indirect2, id.pos_partition[par] + pos / 16 + 14))) return e;
+		for (i = 0; i <= size / 1024 / 1024 - 266 && i < 256; i++)
+		{
+		    block indirect1 = malloc (sizeof (struct block));
+			uint32_t pos_indirect1 = read_uint32_t(indirect2, i);
+			if ((e = read_block(id, indirect1, pos_indirect1))) return e;
+			int j;
+			for (j = 0; j <= size / 1024 - 266 - 256 * i && j < 256; j++)
+			{
+				free_block(id, par, read_uint32_t(indirect1, j));
+			}
+			free_block(id, par, pos_indirect1);
+		}
+	    free_block(id, par, id.pos_partition[par] + pos / 16 + 14);
+	}
 
-    write_uint32_t(p0, 7, next_free);
-    write_block(id, p0, id.pos_partition[par]);
-    write_block(id, file_table, id.pos_partition[par] + TTTFS_VOLUME_FIRST_FREE_FILE / 16 + 1);
-    return 0;*/
+	if (TTTFS_VOLUME_FREE_FILE_COUNT == 0)
+		write_uint32_t(file_table, (pos%16) * 16 + 15, pos);
+	else
+		write_uint32_t(file_table, (pos%16) * 16 + 15, TTTFS_VOLUME_FIRST_FREE_FILE);
+	
+	write_uint32_t(p0, 6, TTTFS_VOLUME_FREE_FILE_COUNT + 1);
+	write_uint32_t(p0, 7, pos);
+	write_block(id, p0, id.pos_partition[par]);
+	write_block(id, file_table, id.pos_partition[par] + pos / 16 + 1);
+	
+    return 0;
 }
 
 

@@ -1,6 +1,6 @@
 #include "error.h"
 
-char *errors_list[] = {
+char* errors_list[] = {
 	"Success",
 	"Operation not permitted",
 	"No such file or directory",
@@ -85,7 +85,7 @@ char *errors_list[] = {
 	".lib section in a.out corrupted",
 	"Attempting to link in too many shared libraries",
 	"Cannot exec a shared library directly",
-	"Invalid or incomplete multibyte or wide character",
+	"Invalid or inerror_description(error e)complete multibyte or wide character",
 	"Interrupted system call should be restarted",
 	"Streams pipe error",
 	"Too many users",
@@ -147,3 +147,9 @@ char *errors_list[] = {
     "File out of bounds.",
     "File already free."
 };
+
+
+char* error_description(error e)
+{
+	return errors_list[e];
+}

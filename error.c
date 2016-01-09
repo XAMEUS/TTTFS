@@ -141,5 +141,8 @@ char *errors_list[] = {
 	"Cannot partition anymore, no more free space",
 	"Partition doesn't exists",
 	"Format error: not enough space in this partition",
-	"Cannot free this block, already free."
+	"Cannot free this block, already free.",
+	"Cannot alocate an other block, all alocated.",
+    "Cannot create file, full file table.",
+    "File out of bounds."
 };

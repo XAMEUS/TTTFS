@@ -18,7 +18,7 @@ tfs_partition: ll.o error.o tfs_partition.c
 tfs_analyse: ll.o error.o tfs_analyse.c
 	gcc ll.o tfs_analyse.c -o tfs_analyse '-lm' -Wall
 
-tfs_format: ll.o error.o tfs_format.c
+tfs_format: ll.o error.o tfs_format.c stdltfs.o
 	gcc ll.o tfs_format.c -o tfs_format '-lm' -Wall
 
 disk:

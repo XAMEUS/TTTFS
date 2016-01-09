@@ -115,6 +115,24 @@ error create_file(disk_id id, uint32_t par, uint32_t type, uint32_t subtype)
     return 0;
 }
 
+int is_free_file(disk_id id, uint32_t pos_par, uint32_t free_file, uint32_t pos)
+{
+    uint32_t next_free_file;
+	block file_table = malloc (sizeof (struct block));
+	read_block(id, file_table, pos_par + free_file / 16 + 1);
+	next_free_file = read_uint32_t(file_table, free_file % 16 * 16 + 15);
+	while (free_file != next_free_file)
+	{
+		if (free_file == pos)
+			return 1;
+		free_file = next_free_file;
+		read_block(id, file_table, pos_par + free_file / 16 + 1);
+		next_free_file = read_uint32_t(file_table, free_file % 16 * 16 + 15);
+	}
+	if (free_file == pos) return 1;
+	return 0;
+}
+
 error remove_file(disk_id id, uint32_t par, uint32_t pos)
 {
     if (par >= read_uint32_t(id.b0, 1))
@@ -129,11 +147,19 @@ error remove_file(disk_id id, uint32_t par, uint32_t pos)
 	uint32_t TTTFS_VOLUME_FIRST_FREE_FILE = read_uint32_t(p0, 7);
     if (TTTFS_VOLUME_MAX_FILE_COUNT < pos)
         return FILE_OUT_OF_BOUNDS;
+    if (is_free_file(id, id.pos_partition[par], TTTFS_VOLUME_FIRST_FREE_FILE, pos))
+        return FILE_ALREADY_FREE;
     
-    #TODO
-	block file_table = malloc (sizeof (struct block));
-    if ((e = read_block(id, file_table, id.pos_partition[par] + TTTFS_VOLUME_FIRST_FREE_FILE / 16 + 1))) return e;
-    uint32_t size = 0;
+    block file_table = malloc (sizeof (struct block));
+    if ((e = read_block(id, file_table, id.pos_partition[par] + pos / 16 + 1))) return e;
+    uint32_t size = read_uint32_t(file_table, (pos%16) * 16);
+    int i;
+    for (i = 0; i <= size / 1024; i++)
+    {
+        free_block(id, par, (pos%16) * 16 + 3 + i);
+    }
+    
+	/*
     if (type == 1) size = 64;
     uint32_t next_free = read_uint32_t(file_table, (TTTFS_VOLUME_FIRST_FREE_FILE%16) * 16 + 15);
     write_uint32_t(file_table, (TTTFS_VOLUME_FIRST_FREE_FILE%16) * 16, size);
@@ -158,7 +184,7 @@ error remove_file(disk_id id, uint32_t par, uint32_t pos)
     write_uint32_t(p0, 7, next_free);
     write_block(id, p0, id.pos_partition[par]);
     write_block(id, file_table, id.pos_partition[par] + TTTFS_VOLUME_FIRST_FREE_FILE / 16 + 1);
-    return 0;
+    return 0;*/
 }
 
 

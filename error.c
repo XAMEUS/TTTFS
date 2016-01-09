@@ -144,5 +144,6 @@ char *errors_list[] = {
 	"Cannot free this block, already free.",
 	"Cannot alocate an other block, all alocated.",
     "Cannot create file, full file table.",
-    "File out of bounds."
+    "File out of bounds.",
+    "File already free."
 };

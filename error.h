@@ -10,5 +10,6 @@
 #define ALL_BLOCKS_ALLOCATED 141
 #define FULL_FILE_TABLE 142
 #define FILE_OUT_OF_BOUNDS 143
+#define FILE_ALREADY_FREE 144
 
 typedef int error;

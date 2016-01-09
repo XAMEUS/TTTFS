@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <errno.h>
 
 #define BLOCK_OUT_OF_BOUNDS 135
 #define B0_FULL 136

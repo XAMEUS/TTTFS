@@ -4,7 +4,7 @@ EXEC = all
 HEADERS = $(wildcard *.h)
 OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))
 
-all: tfs_create tfs_partition tfs_analyse tfs_format test
+all: tfs_create tfs_partition tfs_analyse tfs_format
 
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -c $< '-lm'
@@ -28,13 +28,10 @@ disk:
 od:
 	od -D disk.tfs
 
-test: ll.o error.o test.c
-	gcc ll.o test.c -o test '-lm' -Wall
-
 clean:
 	rm -f $(OBJECTS)
+	rm tfs_create tfs_partition tfs_analyse tfs_format
 	rm disk.tfs
-	rm tfs_create tfs_partition tfs_analyse tfs_format test
 
 mrproper: clean
 	rm -f $(EXEC)

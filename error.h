@@ -12,6 +12,8 @@
 #define FILE_OUT_OF_BOUNDS 143
 #define FILE_ALREADY_FREE 144
 #define NOT_ENOUGH_FREE_BLOCKS 145
+#define BAD_PATHNAME 146
+#define PATH_TO_HOST 147
 
 typedef int error;
 

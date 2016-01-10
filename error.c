@@ -146,7 +146,9 @@ char* errors_list[] = {
     "Cannot create file, full file table.",
     "File out of bounds.",
     "File already free.",
-	"Not enough space on partition."
+	"Not enough space on partition.",
+	"Pathname isn't correct."
+	"Cant use this command in HOST"
 };
 
 

@@ -423,7 +423,7 @@ error search_dir(disk_id id, uint32_t par, uint32_t file, char* path){ //cherche
     return 0;
 }
 
-uint32_t pathToId(char* path){
+uint32_t path_to_id(char* path){
 	char* token = strtok(path,"//");
 	if(strcmp(token, "FILE:")!=0){
 		return BAD_PATHNAME;

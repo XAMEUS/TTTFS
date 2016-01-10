@@ -35,6 +35,7 @@ error free_block(disk_id id, uint32_t par, uint32_t pos)
 		return BLOCK_ALREADY_FREE;
 	
 	block b = malloc (sizeof (struct block));
+	myfree(b);
 	if (TTTFS_VOLUME_FREE_BLOCK_COUNT == 0)
 		write_uint32_t(b, 255, pos);
 	else
@@ -160,7 +161,7 @@ error remove_file(disk_id id, uint32_t par, uint32_t pos)
     int i;
     for (i = 0; i <= size / 1024 && i < 10; i++)
     {
-        free_block(id, par, (pos%16) * 16 + 3 + i);
+        free_block(id, par, read_uint32_t(file_table,(pos%16) * 16 + 3 + i));
     }
 	if (size / 1024 > 10)
 	{

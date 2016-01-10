@@ -149,7 +149,8 @@ char* errors_list[] = {
 	"Not enough space on partition.",
 	"Pathname isn't correct.",
 	"Cant use this command in HOST",
-	"This file isn't a directory"
+	"This file isn't a directory",
+	"Directory not empty"
 };
 
 

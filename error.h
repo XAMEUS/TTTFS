@@ -15,6 +15,7 @@
 #define BAD_PATHNAME 146
 #define PATH_TO_HOST 147
 #define NOT_A_DIRECTORY 148
+#define DIRECTORY_NOT_EMPTY 149
 
 typedef int error;
 

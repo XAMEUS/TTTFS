@@ -35,3 +35,21 @@ int tfs_mkdir(disk_id id, uint32_t par, char* path, char* name)
 	create_file(id, par, e, 1, 0);
 	return TTTFS_VOLUME_FIRST_FREE_FILE;
 }
+
+int tfs_rmdir(disk_id id, uint32_t par, char *path){
+	if (par >= read_uint32_t(id.b0, 1))
+		return -PARTITION_NOT_FOUND;
+	int e = id_from_path(id, par, path);
+	if (e < 0) return e;
+	block file_table = malloc (sizeof (struct block));
+	read_block(id, file_table, id.pos_partition[par] + 1 + e / 16);
+	uint32_t type = read_uint32_t(file_table, (e%16) * 16 + 1);
+	uint32_t size = read_uint32_t(file_table, (e%16) * 16);
+	printf("file = %d",e);
+	if(type == 1 && size > 64){
+		return -DIRECTORY_NOT_EMPTY; // recursion ?
+	}
+	error er;
+	if((er = remove_file(id,par,e) != 0))	 return er;	
+	return e;
+}

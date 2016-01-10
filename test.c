@@ -38,6 +38,10 @@ int main(int argc, char* argv[])
 	tfs_mkdir(dk, 0, path, "b");
 	char path2[] = "/a/b";
 	tfs_mkdir(dk, 0, path2, "c");
+	char path4[] = "/a/b";
+	tfs_mkdir(dk, 0, path4, "d");
+	char path3[] = "/a/b";
+	tfs_rmdir(dk, 0, path3, "c");
 	
 	stop_disk(dk);
 	return 0;

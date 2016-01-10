@@ -40,9 +40,10 @@ error free_block(disk_id id, uint32_t par, uint32_t pos)
 		write_uint32_t(b, 255, pos);
 	else
 		write_uint32_t(b, 255, TTTFS_VOLUME_FIRST_FREE_BLOCK);
-	
+
 	write_uint32_t(p0, 3, TTTFS_VOLUME_FREE_BLOCK_COUNT + 1);
 	write_uint32_t(p0, 4, pos);
+	printf("%u\n", read_uint32_t(p0, 4));
 	write_block(id, p0, id.pos_partition[par]);
 	write_block(id, b, id.pos_partition[par] + pos);
 	return 0;
@@ -199,6 +200,8 @@ error remove_file(disk_id id, uint32_t par, uint32_t pos)
 	else
 		write_uint32_t(file_table, (pos%16) * 16 + 15, TTTFS_VOLUME_FIRST_FREE_FILE);
 	
+	if ((e = read_block(id, p0, id.pos_partition[par]))) return e;
+	printf("%u\n", read_uint32_t(p0, 4));
 	write_uint32_t(p0, 6, TTTFS_VOLUME_FREE_FILE_COUNT + 1);
 	write_uint32_t(p0, 7, pos);
 	write_block(id, p0, id.pos_partition[par]);

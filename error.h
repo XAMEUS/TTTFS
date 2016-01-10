@@ -14,6 +14,7 @@
 #define NOT_ENOUGH_FREE_BLOCKS 145
 #define BAD_PATHNAME 146
 #define PATH_TO_HOST 147
+#define NOT_A_DIRECTORY 148
 
 typedef int error;
 

@@ -167,7 +167,7 @@ error remove_file(disk_id id, uint32_t par, uint32_t pos)
 		block indirect1 = malloc (sizeof (struct block));
 		uint32_t pos_indirect1 = read_uint32_t(file_table, (pos%16) * 16 + 13);
 	    if ((e = read_block(id, indirect1, id.pos_partition[par] + pos_indirect1))) return e;
-		for (i = 0; i <= (size - 10) / 1024 && i < 256; i++)
+		for (i = 0; i <= (size / 1024 - 10) && i < 256; i++)
 		{
 		    free_block(id, par, read_uint32_t(indirect1, i));
 		}
@@ -178,13 +178,13 @@ error remove_file(disk_id id, uint32_t par, uint32_t pos)
 		block indirect2 = malloc (sizeof (struct block));
 		uint32_t pos_indirect2 = read_uint32_t(file_table, (pos%16) * 16 + 14);
 	    if ((e = read_block(id, indirect2, id.pos_partition[par] + pos_indirect2))) return e;
-		for (i = 0; i <= (size - 266) / 1024 / 1024 && i < 256; i++)
+		for (i = 0; i <= (size / 1024 - 266) / 256 && i < 256; i++)
 		{
 		    block indirect1 = malloc (sizeof (struct block));
 			uint32_t pos_indirect1 = read_uint32_t(indirect2, i);
 			if ((e = read_block(id, indirect1, pos_indirect1))) return e;
 			int j;
-			for (j = 0; j <= (size - 266 - 256 * i) / 1024 && j < 256; j++)
+			for (j = 0; j <= (size / 1024 - 266 - 256 * i) && j < 256; j++)
 			{
 				free_block(id, par, read_uint32_t(indirect1, j));
 			}
@@ -244,7 +244,7 @@ error add_blocks_file(disk_id id, uint32_t par, uint32_t file, uint32_t nblocks)
 		}
 	    if ((e = read_block(id, indirect1, id.pos_partition[par] + read_uint32_t(file_table, (file % 16) * 16 + 13)))) return e;
 
-		for (i = tfs_size / 1024 + 1; i <= (tfs_size - 10) / 1024 + nblocks && i < 256; i++)
+		for (i = tfs_size / 1024 + 1; i <= tfs_size / 1024 - 10 + nblocks && i < 256; i++)
 		{
 		    write_uint32_t(indirect1, i, TTTFS_VOLUME_FIRST_FREE_BLOCK);
 		    alocate_block(id, par);
@@ -264,7 +264,7 @@ error add_blocks_file(disk_id id, uint32_t par, uint32_t file, uint32_t nblocks)
 			TTTFS_VOLUME_FIRST_FREE_BLOCK = read_uint32_t(p0, 4);
 		}
 	    if ((e = read_block(id, indirect2, id.pos_partition[par] + pos_indirect2))) return e;
-		for (i = tfs_size / 1024 / 1024; i <= (tfs_size - 266) / 1024 / 1024 + nblocks / 1024 && i < 256; i++)
+		for (i = tfs_size / 1024 / 256; i <= (tfs_size / 1024 - 266) / 256 + nblocks / 256 && i < 256; i++)
 		{
 		    block indirect1 = malloc (sizeof (struct block));
 			if (tfs_size / 1024 <= 266 + 256 * i)
@@ -277,7 +277,7 @@ error add_blocks_file(disk_id id, uint32_t par, uint32_t file, uint32_t nblocks)
 			if ((e = read_block(id, indirect1, id.pos_partition[par] + read_uint32_t(indirect2, i)))) return e;
 
 			int j;
-			for (j = tfs_size / 1024 + 1; j <= (tfs_size - 266 - 256 * i) / 1024 + nblocks && j < 256; j++)
+			for (j = tfs_size / 1024 + 1; j <= (tfs_size / 1024 - 266 - 256 * i) + nblocks && j < 256; j++)
 			{
 				write_uint32_t(indirect1, j, TTTFS_VOLUME_FIRST_FREE_BLOCK);
 				alocate_block(id, par);
@@ -308,7 +308,7 @@ error remove_blocks_file(disk_id id, uint32_t par, uint32_t file, uint32_t nbloc
 		block indirect1 = malloc (sizeof (struct block));
 		uint32_t pos_indirect1 = read_uint32_t(file_table, (file%16) * 16 + 13);
 	    if ((e = read_block(id, indirect1, id.pos_partition[par] + pos_indirect1))) return e;
-		for (i = size / 1024 + 1 - nblocks; i <= (size - 10) / 1024 && i < 256; i++)
+		for (i = size / 1024 + 1 - nblocks; i <= size / 1024 - 10 && i < 256; i++)
 		{
 		    free_block(id, par, read_uint32_t(indirect1, i));
 		}
@@ -320,13 +320,13 @@ error remove_blocks_file(disk_id id, uint32_t par, uint32_t file, uint32_t nbloc
 		block indirect2 = malloc (sizeof (struct block));
 		uint32_t pos_indirect2 = read_uint32_t(file_table, (file%16) * 16 + 14);
 	    if ((e = read_block(id, indirect2, id.pos_partition[par] + pos_indirect2))) return e;
-		for (i = size / 1024 / 1024 - nblocks / 1024; i <= (size - 266) / 1024 / 1024 && i < 256; i++)
+		for (i = size / 1024 / 256 - nblocks / 256; i <= (size / 1024 - 266) / 256 && i < 256; i++)
 		{
 		    block indirect1 = malloc (sizeof (struct block));
 			uint32_t pos_indirect1 = read_uint32_t(indirect2, i);
 			if ((e = read_block(id, indirect1, pos_indirect1))) return e;
 			int j;
-			for (j = size / 1024 + 1 - nblocks; j <= (size - 266 - 256 * i) / 1024 && j < 256; j++)
+			for (j = size / 1024 + 1 - nblocks; j <= (size / 1024 - 266 - 256 * i) && j < 256; j++)
 			{
 				free_block(id, par, read_uint32_t(indirect1, j));
 			}
@@ -370,39 +370,53 @@ error update_blocks_file(disk_id id, uint32_t par, uint32_t file, uint32_t next_
 	return 0;
 }
 
-error search_dir(disk_id id, uint32_t par, uint32_t file, char* path){ //cherche dans le repertoire si un lien de nom path existe
-	f (par >= read_uint32_t(id.b0, 1))
-		return PARTITION_NOT_FOUND;
+int search_file(disk_id id, uint32_t par, uint32_t dir, uint32_t size, char* name)
+{
+    block dblock = malloc (sizeof (struct block));
+	read_block(id, dblock, id.pos_partition[par] + dir);
+	int i;
+	for (i = 0; i < 32 && i < size / 32; i++)
+	{
+		if (strcmp((char*) (dblock->data + i * 32 + 4), name) == 0)
+			return read_uint32_t(dblock, i * 8);
+	}
+	return -1;
+}
+
+int search_dir(disk_id id, uint32_t par, uint32_t file, char* path)
+{
+	if (par >= read_uint32_t(id.b0, 1))
+		return -PARTITION_NOT_FOUND;
     block p0 = malloc (sizeof (struct block));
 	error e;
 	if ((e = read_block(id, p0, id.pos_partition[par]))) return e;
     
 	uint32_t TTTFS_VOLUME_MAX_FILE_COUNT = read_uint32_t(p0, 5);
-	uint32_t TTTFS_VOLUME_FREE_FILE_COUNT = read_uint32_t(p0, 6);
-	uint32_t TTTFS_VOLUME_FIRST_FREE_FILE = read_uint32_t(p0, 7);
     if (TTTFS_VOLUME_MAX_FILE_COUNT < file)
-        return FILE_OUT_OF_BOUNDS;
+        return -FILE_OUT_OF_BOUNDS;
 
     block file_table = malloc (sizeof (struct block));
     if ((e = read_block(id, file_table, id.pos_partition[par] + file / 16 + 1))) return e;
-    //TODO if file != repertoire : erreur
+    
     if((read_uint32_t(file_table,(file%16) * 16 + 1)) != TFS_DIRECTORY)
-    	return NOT_A_DIRECTORY;
+    	return -NOT_A_DIRECTORY;
     uint32_t size = read_uint32_t(file_table, (file%16) * 16);
     int i;
-    //TODO (return -1 if true ?)
+
     for (i = 0; i <= size / 1024 && i < 10; i++)
     {
-    	//HERE
+    	int e = search_file(id, par, read_uint32_t(file_table, (file%16) * 16 + 3 + i), size - i * 1024, path);
+		if (e != -1) return e;
     }
 	if (size / 1024 > 10)
 	{
 		block indirect1 = malloc (sizeof (struct block));
 		uint32_t pos_indirect1 = read_uint32_t(file_table, (file%16) * 16 + 13);
 	    if ((e = read_block(id, indirect1, id.pos_partition[par] + pos_indirect1))) return e;
-		for (i = 0; i <= (size - 10) / 1024 && i < 256; i++)
+		for (i = 0; i <= size / 1024 - 10 && i < 256; i++)
 		{
-		    //HERE
+			int e = search_file(id, par, read_uint32_t(indirect1, i), size - i * 1024 - 10240, path);
+			if (e != -1) return e;
 		}
 	}
 	if (size / 1024 > 266)
@@ -410,35 +424,77 @@ error search_dir(disk_id id, uint32_t par, uint32_t file, char* path){ //cherche
 		block indirect2 = malloc (sizeof (struct block));
 		uint32_t pos_indirect2 = read_uint32_t(file_table, (file%16) * 16 + 14);
 	    if ((e = read_block(id, indirect2, id.pos_partition[par] + pos_indirect2))) return e;
-		for (i = 0; i <= (size - 266) / 1024 / 1024 && i < 256; i++)
+		for (i = 0; i <= (size / 1024 - 266) / 256 && i < 256; i++)
 		{
 		    block indirect1 = malloc (sizeof (struct block));
 			uint32_t pos_indirect1 = read_uint32_t(indirect2, i);
 			if ((e = read_block(id, indirect1, pos_indirect1))) return e;
 			int j;
-			for (j = 0; j <= (size - 266 - 256 * i) / 1024 && j < 256; j++)
+			for (j = 0; j <= (size / 1024 - 266 - 256 * i) && j < 256; j++)
 			{
-				//HERE
+				int e = search_file(id, par, read_uint32_t(indirect1, j), size - i * 256 * 1024 - j * 1024 - 256*1024 - 10240, path);
+				if (e != -1) return e;
 			}
 		}
 	}
-    return 0;
+    return -1;
 }
 
+int id_from_path(disk_id id, uint32_t par, char* path)
+{
+	char* token = strtok(path, "/");
+	if (token == NULL) return 0;
+	int e = 0;
+	while (token != NULL)
+	{
+		if (e == -1) return -BAD_PATHNAME;
+		e = search_dir(id, par, e, token);
+		token = strtok(NULL, "/");
+	}
+	if (e == -1) return -BAD_PATHNAME;
+	return e;
+}
+
+uint32_t last_data_block_of_file(disk_id id, uint32_t par, uint32_t file)
+{
+	block file_table = malloc (sizeof (struct block));
+	read_block(id, file_table, id.pos_partition[par] + 1 + file / 16);
+	uint32_t size = read_uint32_t(file_table, (file%16) * 16);
+	if (size < 1024 * 10)
+	{
+		return read_uint32_t(file_table, 3 + (file%16) * 16 + size / 1024);
+	}
+	if (size < 1024 * 266)
+	{
+		block indirect1 = malloc (sizeof (struct block));
+		read_block(id, indirect1, id.pos_partition[par] + read_uint32_t(file_table, 13 + (file%16) * 16));
+		return read_uint32_t(indirect1, size / 1024 - 10);
+	}
+	block indirect2 = malloc (sizeof (struct block));
+	read_block(id, indirect2, id.pos_partition[par] + read_uint32_t(file_table, 14 + (file%16) * 16));
+	block indirect1 = malloc (sizeof (struct block));
+	read_block(id, indirect1, id.pos_partition[par] + read_uint32_t(indirect2, (size / 1024 - 266) / 256));
+	return read_uint32_t(indirect1, (size / 1024 - 266) % 256);
+}
+/*
 uint32_t path_to_id(char* path){
-	char* token = strtok(path,"//");
-	if(strcmp(token, "FILE:")!=0){
+	
+	char* token = strtok(path, "//");
+
+	if(strcmp(token, "FILE:")!=0)
+	{
 		return BAD_PATHNAME;
 	}
 
 	token = strtok(path,"/");
-	if(strcmp(token,"HOST")==0){
+	if(strcmp(token,"HOST")==0)
+	{
 		return PATH_TO_HOST;
 	}
 
 	disk_id id;
-	start_disk(token,&id);
-	token = strtok(path,"/");
+	start_disk(token, &id);
+	token = strtok(path, "/");
 	uint32_t par = atoi(token);
 	if(par + 1 > read_uint32_t(id.b0,1)){
 		return PARTITION_NOT_FOUND;
@@ -451,6 +507,5 @@ uint32_t path_to_id(char* path){
 	while(token!=NULL){
 
 	}
-
-
-}
+	return 0;
+}*/

@@ -11,3 +11,4 @@ error create_file(disk_id id, uint32_t par, uint32_t dir, uint32_t type, uint32_
 int is_free_file(disk_id id, uint32_t par, uint32_t free_file, uint32_t pos);
 
 error remove_file(disk_id id, uint32_t par, uint32_t pos);
+

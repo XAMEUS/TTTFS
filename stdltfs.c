@@ -165,30 +165,32 @@ error remove_file(disk_id id, uint32_t par, uint32_t pos)
 	if (size / 1024 > 10)
 	{
 		block indirect1 = malloc (sizeof (struct block));
-	    if ((e = read_block(id, indirect1, id.pos_partition[par] + pos / 16 + 13))) return e;
-		for (i = 0; i <= size / 1024 - 10 && i < 256; i++)
+		uint32_t pos_indirect1 = read_uint32_t(file_table, (pos%16) * 16 + 13);
+	    if ((e = read_block(id, indirect1, id.pos_partition[par] + pos_indirect1))) return e;
+		for (i = 0; i <= (size - 10) / 1024 && i < 256; i++)
 		{
 		    free_block(id, par, read_uint32_t(indirect1, i));
 		}
-	    free_block(id, par, id.pos_partition[par] + pos / 16 + 13);
+	    free_block(id, par, id.pos_partition[par] + pos_indirect1);
 	}
 	if (size / 1024 > 266)
 	{
 		block indirect2 = malloc (sizeof (struct block));
-	    if ((e = read_block(id, indirect2, id.pos_partition[par] + pos / 16 + 14))) return e;
-		for (i = 0; i <= size / 1024 / 1024 - 266 && i < 256; i++)
+		uint32_t pos_indirect2 = read_uint32_t(file_table, (pos%16) * 16 + 14);
+	    if ((e = read_block(id, indirect2, id.pos_partition[par] + pos_indirect2))) return e;
+		for (i = 0; i <= (size - 266) / 1024 / 1024 && i < 256; i++)
 		{
 		    block indirect1 = malloc (sizeof (struct block));
 			uint32_t pos_indirect1 = read_uint32_t(indirect2, i);
 			if ((e = read_block(id, indirect1, pos_indirect1))) return e;
 			int j;
-			for (j = 0; j <= size / 1024 - 266 - 256 * i && j < 256; j++)
+			for (j = 0; j <= (size - 266 - 256 * i) / 1024 && j < 256; j++)
 			{
 				free_block(id, par, read_uint32_t(indirect1, j));
 			}
 			free_block(id, par, pos_indirect1);
 		}
-	    free_block(id, par, id.pos_partition[par] + pos / 16 + 14);
+	    free_block(id, par, id.pos_partition[par] + pos_indirect2);
 	}
 
 	if (TTTFS_VOLUME_FREE_FILE_COUNT == 0)
@@ -204,9 +206,166 @@ error remove_file(disk_id id, uint32_t par, uint32_t pos)
     return 0;
 }
 
+error add_blocks_file(disk_id id, uint32_t par, uint32_t file, uint32_t nblocks)
+{
+	if (par >= read_uint32_t(id.b0, 1))
+		return PARTITION_NOT_FOUND;
+    block p0 = malloc (sizeof (struct block));
+	error e;
+	if ((e = read_block(id, p0, id.pos_partition[par]))) return e;
+    
+	uint32_t TTTFS_VOLUME_FREE_BLOCK_COUNT = read_uint32_t(p0, 3);
+	uint32_t TTTFS_VOLUME_FIRST_FREE_BLOCK = read_uint32_t(p0, 4);
+	
+	if (TTTFS_VOLUME_FREE_BLOCK_COUNT < nblocks)
+		return NOT_ENOUGH_FREE_BLOCKS;
+	
+    block file_table = malloc (sizeof (struct block));
+	if ((e = read_block(id, file_table, id.pos_partition[par] + file / 16 + 1))) return e;
+	uint32_t tfs_size = read_uint32_t(file_table, file % 16 * 16);
+	
+	int i;
+    for (i = tfs_size / 1024 + 1; i <= tfs_size / 1024 + nblocks && i < 10; i++)
+    {
+		write_uint32_t(file_table, (file % 16) * 16 + 3 + i, TTTFS_VOLUME_FIRST_FREE_BLOCK);
+        alocate_block(id, par);
+		if ((e = read_block(id, p0, id.pos_partition[par]))) return e;
+		TTTFS_VOLUME_FIRST_FREE_BLOCK = read_uint32_t(p0, 4);
+    }
+	if (tfs_size / 1024 + nblocks > 10)
+	{
+		block indirect1 = malloc (sizeof (struct block));
+		if (tfs_size / 1024 <= 10)
+		{
+			write_uint32_t(file_table, (file % 16) * 16 + 13, TTTFS_VOLUME_FIRST_FREE_BLOCK);
+		    alocate_block(id, par);
+			if ((e = read_block(id, p0, id.pos_partition[par]))) return e;
+			TTTFS_VOLUME_FIRST_FREE_BLOCK = read_uint32_t(p0, 4);
+		}
+	    if ((e = read_block(id, indirect1, id.pos_partition[par] + read_uint32_t(file_table, (file % 16) * 16 + 13)))) return e;
+
+		for (i = tfs_size / 1024 + 1; i <= (tfs_size - 10) / 1024 + nblocks && i < 256; i++)
+		{
+		    write_uint32_t(indirect1, i, TTTFS_VOLUME_FIRST_FREE_BLOCK);
+		    alocate_block(id, par);
+			if ((e = read_block(id, p0, id.pos_partition[par]))) return e;
+			TTTFS_VOLUME_FIRST_FREE_BLOCK = read_uint32_t(p0, 4);
+		}
+	}
+	if (tfs_size / 1024 + nblocks > 266)
+	{
+		block indirect2 = malloc (sizeof (struct block));
+		uint32_t pos_indirect2 = read_uint32_t(file_table, (file%16) * 16 + 14);
+		if (tfs_size / 1024 <= 266)
+		{
+			write_uint32_t(file_table, pos_indirect2, TTTFS_VOLUME_FIRST_FREE_BLOCK);
+		    alocate_block(id, par);
+			if ((e = read_block(id, p0, id.pos_partition[par]))) return e;
+			TTTFS_VOLUME_FIRST_FREE_BLOCK = read_uint32_t(p0, 4);
+		}
+	    if ((e = read_block(id, indirect2, id.pos_partition[par] + pos_indirect2))) return e;
+		for (i = tfs_size / 1024 / 1024; i <= (tfs_size - 266) / 1024 / 1024 + nblocks / 1024 && i < 256; i++)
+		{
+		    block indirect1 = malloc (sizeof (struct block));
+			if (tfs_size / 1024 <= 266 + 256 * i)
+			{
+				write_uint32_t(indirect2, i, TTTFS_VOLUME_FIRST_FREE_BLOCK);
+				alocate_block(id, par);
+				if ((e = read_block(id, p0, id.pos_partition[par]))) return e;
+				TTTFS_VOLUME_FIRST_FREE_BLOCK = read_uint32_t(p0, 4);
+			}
+			if ((e = read_block(id, indirect1, id.pos_partition[par] + read_uint32_t(indirect2, i)))) return e;
+
+			int j;
+			for (j = tfs_size / 1024 + 1; j <= (tfs_size - 266 - 256 * i) / 1024 + nblocks && j < 256; j++)
+			{
+				write_uint32_t(indirect1, j, TTTFS_VOLUME_FIRST_FREE_BLOCK);
+				alocate_block(id, par);
+				if ((e = read_block(id, p0, id.pos_partition[par]))) return e;
+				TTTFS_VOLUME_FIRST_FREE_BLOCK = read_uint32_t(p0, 4);
+			}
+		}
+	}
+	return 0;
+}
+
+error remove_blocks_file(disk_id id, uint32_t par, uint32_t file, uint32_t nblocks)
+{
+    if (par >= read_uint32_t(id.b0, 1))
+		return PARTITION_NOT_FOUND;
+	error e;
+    
+    block file_table = malloc (sizeof (struct block));
+    if ((e = read_block(id, file_table, id.pos_partition[par] + file / 16 + 1))) return e;
+    uint32_t size = read_uint32_t(file_table, (file%16) * 16);
+    int i;
+    for (i = size / 1024 - nblocks + 1; i <= size / 1024 && i < 10; i++)
+    {
+        free_block(id, par, (file%16) * 16 + 3 + i);
+    }
+	if (size / 1024 > 10)
+	{
+		block indirect1 = malloc (sizeof (struct block));
+		uint32_t pos_indirect1 = read_uint32_t(file_table, (file%16) * 16 + 13);
+	    if ((e = read_block(id, indirect1, id.pos_partition[par] + pos_indirect1))) return e;
+		for (i = size / 1024 + 1 - nblocks; i <= (size - 10) / 1024 && i < 256; i++)
+		{
+		    free_block(id, par, read_uint32_t(indirect1, i));
+		}
+		if (size / 1024 + 1 - nblocks <= 10)
+		    free_block(id, par, id.pos_partition[par] + pos_indirect1);
+	}
+	if (size / 1024 > 266)
+	{
+		block indirect2 = malloc (sizeof (struct block));
+		uint32_t pos_indirect2 = read_uint32_t(file_table, (file%16) * 16 + 14);
+	    if ((e = read_block(id, indirect2, id.pos_partition[par] + pos_indirect2))) return e;
+		for (i = size / 1024 / 1024 - nblocks / 1024; i <= (size - 266) / 1024 / 1024 && i < 256; i++)
+		{
+		    block indirect1 = malloc (sizeof (struct block));
+			uint32_t pos_indirect1 = read_uint32_t(indirect2, i);
+			if ((e = read_block(id, indirect1, pos_indirect1))) return e;
+			int j;
+			for (j = size / 1024 + 1 - nblocks; j <= (size - 266 - 256 * i) / 1024 && j < 256; j++)
+			{
+				free_block(id, par, read_uint32_t(indirect1, j));
+			}
+			if (size / 1024 + 1 - nblocks <= (266 + 256 * i))
+				free_block(id, par, pos_indirect1);
+		}
+		if (size / 1024 <= 266)
+		    free_block(id, par, id.pos_partition[par] + pos_indirect2);
+	}
+
+	write_block(id, file_table, id.pos_partition[par] + file / 16 + 1);
+	
+    return 0;
+}
 
 
+error update_blocks_file(disk_id id, uint32_t par, uint32_t file, uint32_t next_size)
+{
+	if (par >= read_uint32_t(id.b0, 1))
+		return PARTITION_NOT_FOUND;
+	error e;
 
+	block file_table = malloc (sizeof (struct block));
+	if ((e = read_block(id, file_table, id.pos_partition[par] + file / 16 + 1))) return e;
+	uint32_t tfs_size = read_uint32_t(file_table, file % 16 * 16);
 
-
-
+	if (next_size < tfs_size)
+	{
+		uint32_t nblocks = tfs_size / 1024 - next_size / 1024;
+		e = remove_blocks_file(id, par, file, nblocks);
+	}
+	else
+	{
+		uint32_t nblocks = next_size / 1024 - tfs_size / 1024;
+		e = add_blocks_file(id, par, file, nblocks);
+	}
+	if (e) return e;
+	if ((e = read_block(id, file_table, id.pos_partition[par] + file / 16 + 1))) return e;
+	write_uint32_t(file_table, (file % 16) * 16, next_size);
+	write_block(id, file_table, id.pos_partition[par] + file / 16 + 1);
+	return 0;
+}

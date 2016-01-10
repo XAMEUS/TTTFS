@@ -145,7 +145,8 @@ char* errors_list[] = {
 	"Cannot alocate an other block, all alocated.",
     "Cannot create file, full file table.",
     "File out of bounds.",
-    "File already free."
+    "File already free.",
+	"Not enough space on partition."
 };
 
 

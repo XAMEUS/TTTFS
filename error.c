@@ -148,7 +148,8 @@ char* errors_list[] = {
     "File already free.",
 	"Not enough space on partition.",
 	"Pathname isn't correct.",
-	"Cant use this command in HOST"
+	"Cant use this command in HOST",
+	"This file isn't a directory"
 };
 
 

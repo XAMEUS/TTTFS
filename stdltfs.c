@@ -386,6 +386,8 @@ error search_dir(disk_id id, uint32_t par, uint32_t file, char* path){ //cherche
     block file_table = malloc (sizeof (struct block));
     if ((e = read_block(id, file_table, id.pos_partition[par] + file / 16 + 1))) return e;
     //TODO if file != repertoire : erreur
+    if((read_uint32_t(file_table,(file%16) * 16 + 1)) != TFS_DIRECTORY)
+    	return NOT_A_DIRECTORY;
     uint32_t size = read_uint32_t(file_table, (file%16) * 16);
     int i;
     //TODO (return -1 if true ?)

@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
 	//char* token = strtok(text, "/");
 	//printf("%s\n", token);
 	
-	tfs_mkdir(dk, 0, "/", "a");
+	/*tfs_mkdir(dk, 0, "/", "a");
 	char path[] = "/a/";
 	tfs_mkdir(dk, 0, path, "b");
 	char path2[] = "/a/b";
@@ -41,8 +41,17 @@ int main(int argc, char* argv[])
 	char path4[] = "/a/b";
 	tfs_mkdir(dk, 0, path4, "d");
 	char path3[] = "/a/b";
-	tfs_rmdir(dk, 0, path3, "c");
+	tfs_rmdir(dk, 0, path3, "c");*/
+
+	char folie[] = "/";
+	int fd = tfs_open(dk, 0, folie, "e", READ);
 	
+	//char buf[] = "hello\nworld!";
+	//tfs_write(fd, buf, 12);
+	char buf[12];
+	tfs_read(fd, buf, 12);
+	printf("%s\n", buf);
+	tfs_close(fd);
 	stop_disk(dk);
 	return 0;
 }

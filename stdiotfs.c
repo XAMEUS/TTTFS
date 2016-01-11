@@ -199,6 +199,7 @@ int tfs_open(disk_id id, uint32_t par, char* path, char* name, int flags)
 	block file_table = malloc (sizeof (struct block));
 	int dir = id_from_path(id, par, path);
 	int file = search_dir(id, par, dir, name);
+	uint32_t size;
 	if (file < 0)
 	{
 		if (flags&CREATE)
@@ -209,7 +210,7 @@ int tfs_open(disk_id id, uint32_t par, char* path, char* name, int flags)
 			if ((er = read_block(id, p0, id.pos_partition[par]))) return -er;
 			uint32_t TTTFS_VOLUME_FIRST_FREE_FILE = read_uint32_t(p0, 7);
 	
-			uint32_t size = read_uint32_t(file_table, (dir%16) * 16);
+			size = read_uint32_t(file_table, (dir%16) * 16);
 			update_blocks_file(id, par, dir, size + 32);
 	
 			uint32_t pos_last_data_block = last_data_block_of_file(id, par, dir);
@@ -230,11 +231,14 @@ int tfs_open(disk_id id, uint32_t par, char* path, char* name, int flags)
 		}
 		else return file;
 	}
+	read_block(id, file_table, id.pos_partition[par] + file / 16 + 1);
+	size = read_uint32_t(file_table, (file%16) * 16);
 	
 	f->id = file;
 	f->flags = flags;
 	f->disk = id;
 	f->par = par;
+	f->size = size;
 	if (flags&APPEND) f->pos = read_uint32_t(file_table, (file % 16) * 16);
 	else f->pos = 0;
 
@@ -430,7 +434,10 @@ int tfs_write(int fd, void *buf, int size)
 	return c + count;
 }
 
-
+int tfs_get_size(int fd)
+{
+	return _files[fd].size;
+}
 
 
 

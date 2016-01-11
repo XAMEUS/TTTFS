@@ -14,6 +14,7 @@ typedef struct {
 	uint32_t pos;
 	disk_id disk;
 	uint32_t par;
+	uint32_t size;
 } TFS_FILE;
 
 int tfs_mkdir(disk_id id, uint32_t par, char* path, char* name);
@@ -27,3 +28,5 @@ int tfs_close(int fd);
 int tfs_read(int fd, void *buf, int size);
 
 int tfs_write(int fd, void *buf, int size);
+
+int tfs_get_size(int fd);

@@ -3,7 +3,7 @@
 * \brief Accès bas niveau.
 * \author Elbez Samuel, Gourgoulhon Maxime, Jacquette Pierrick, Perrachon Quentin
 * \version 0.1
-* \date 15 décembre 2015
+* \date 11 janvier 2016
 *
 * Programme simulant la couche d’accès de bas niveau à un disque dur
 *
@@ -110,13 +110,20 @@ uint32_t to_uint32_t(unsigned char* c);
 
 /**
 * \fn uint32_t read_uint32_t(block b, uint32_t pos)
-* \brief lit 4 octets à la position donnée et renvoie l'entier correpondant
+* \brief lit 4 octets à la position donnée et renvoie l'entier correpondant.
 * \param b le block
 * \param pos la position
 * \return uint32_t l'entier trouvé
 */
 uint32_t read_uint32_t(block b, uint32_t pos);
 
+/**
+* \fn error write_uint32_t(block b, uint32_t pos)
+* \brief écrit 4 octets à la position donnée.
+* \param b le block
+* \param pos la position
+* \return error
+*/
 error write_uint32_t(block b, uint32_t pos, uint32_t n);
 
 /**

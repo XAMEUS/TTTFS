@@ -1,3 +1,14 @@
+/**
+* \file error.h
+* \brief Gestion des erreurs.
+* \author Elbez Samuel, Gourgoulhon Maxime, Jacquette Pierrick, Perrachon Quentin
+* \version 0.1
+* \date 11 janvier 2016
+*
+* Gestion des erreurs.
+*
+*/
+
 #include <stdio.h>
 #include <errno.h>
 
@@ -19,4 +30,10 @@
 
 typedef int error;
 
+/**
+* \fn char* error_description(error e)
+* \brief récupère la chaîne de caractère correspondant à un code d'erreur.
+* \param e le code d'erreur.
+* \return char*
+*/
 char* error_description(error e);

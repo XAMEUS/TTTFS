@@ -8,16 +8,7 @@
 * Programme simulant la couche d’accès de bas niveau à un disque dur
 *
 */
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <math.h>
-#include "error.h"
+#include "utils.h"
 
 #define TTTFS_MAGIC_NUMBER 0x31534654
 #define TTTFS_VOLUME_BLOCK_SIZE 1024

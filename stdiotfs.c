@@ -39,7 +39,7 @@ int tfs_mkdir(disk_id id, uint32_t par, char* path, char* name)
 	return TTTFS_VOLUME_FIRST_FREE_FILE;
 }
 
-int tfs_rmdir(disk_id id, uint32_t par, char *path, char* name)
+int tfs_rm(disk_id id, uint32_t par, char *path, char* name)
 {
 	if (par >= read_uint32_t(id.b0, 1))
 		return -PARTITION_NOT_FOUND;
@@ -68,7 +68,16 @@ int tfs_rmdir(disk_id id, uint32_t par, char *path, char* name)
 				memcpy(dblock->data + (k-1) * 32, dblock->data + k*32, 32);
 			}
 			if (pos_dir_son == 0 && strcmp((char*) (dblock->data + k * 32 + 4), name) == 0)
+			{
 				pos_dir_son = read_uint32_t(dblock, k * 8);
+				read_block(id, file_table, id.pos_partition[par] + 1 + pos_dir_son / 16);
+				uint32_t son_type = read_uint32_t(file_table, (pos_dir_son%16) * 16 + 1);
+				uint32_t son_size = read_uint32_t(file_table, (pos_dir_son%16) * 16);
+
+				if(son_type == 1 && son_size > 64){
+					return -DIRECTORY_NOT_EMPTY; // recursion ?
+				}
+			}
 		}
 		if (pos_dir_son) {
 			if (size > 1024 * (i + 1) && i < 9)
@@ -104,7 +113,16 @@ int tfs_rmdir(disk_id id, uint32_t par, char *path, char* name)
 					memcpy(dblock->data + (k-1) * 32, dblock->data + k*32, 32);
 				}
 				if (pos_dir_son == 0 && strcmp((char*) (dblock->data + k * 32 + 4), name) == 0)
+				{
 					pos_dir_son = read_uint32_t(dblock, k * 8);
+					read_block(id, file_table, id.pos_partition[par] + 1 + pos_dir_son / 16);
+					uint32_t son_type = read_uint32_t(file_table, (pos_dir_son%16) * 16 + 1);
+					uint32_t son_size = read_uint32_t(file_table, (pos_dir_son%16) * 16);
+
+					if(son_type == 1 && son_size > 64){
+						return -DIRECTORY_NOT_EMPTY; // recursion ?
+					}
+				}
 			}
 			if (pos_dir_son) {
 				if (size > 1024 * (i + 1 + 10) && i < 255)
@@ -148,7 +166,16 @@ int tfs_rmdir(disk_id id, uint32_t par, char *path, char* name)
 						memcpy(dblock->data + (k-1) * 32, dblock->data + k*32, 32);
 					}
 					if (pos_dir_son == 0 && strcmp((char*) (dblock->data + k * 32 + 4), name) == 0)
+					{
 						pos_dir_son = read_uint32_t(dblock, k * 8);
+						read_block(id, file_table, id.pos_partition[par] + 1 + pos_dir_son / 16);
+						uint32_t son_type = read_uint32_t(file_table, (pos_dir_son%16) * 16 + 1);
+						uint32_t son_size = read_uint32_t(file_table, (pos_dir_son%16) * 16);
+
+						if(son_type == 1 && son_size > 64){
+							return -DIRECTORY_NOT_EMPTY; // recursion ?
+						}
+					}
 				}
 				if (pos_dir_son) {
 					if (size > 1024 * (j + 1 + 266 + i * 256) && j < 255)
@@ -170,13 +197,6 @@ int tfs_rmdir(disk_id id, uint32_t par, char *path, char* name)
 		}
 	}
 
-	read_block(id, file_table, id.pos_partition[par] + 1 + pos_dir_son / 16);
-	uint32_t son_type = read_uint32_t(file_table, (pos_dir_son%16) * 16 + 1);
-	uint32_t son_size = read_uint32_t(file_table, (pos_dir_son%16) * 16);
-
-	if(son_type == 1 && son_size > 64){
-		return -DIRECTORY_NOT_EMPTY; // recursion ?
-	}
 	error er;
 	if((er = remove_file(id, par, pos_dir_son) != 0)) return er;	
 	update_blocks_file(id, par, pos_dir_parent, size - 32);
@@ -439,7 +459,20 @@ int tfs_get_size(int fd)
 	return _files[fd].size;
 }
 
-
+int tfs_cat(int fd1)
+{
+	char buf[1024];
+	int i;
+	for (i = 0; i * 1024 < tfs_get_size(fd1); i++)
+	{
+		int s = tfs_get_size(fd1) - i*1024;
+		if (s > 1024) s = 1024;
+		tfs_read(fd1, buf, s);
+		printf("%s", buf);
+	}
+	printf("\n");
+	return 0;
+}
 
 
 

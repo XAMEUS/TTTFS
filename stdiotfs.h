@@ -19,7 +19,7 @@ typedef struct {
 
 int tfs_mkdir(disk_id id, uint32_t par, char* path, char* name);
 
-int tfs_rmdir(disk_id id, uint32_t par, char *path, char* name);
+int tfs_rm(disk_id id, uint32_t par, char *path, char* name);
 
 int tfs_open(disk_id id, uint32_t par, char* path, char* name, int flags);
 
@@ -30,3 +30,5 @@ int tfs_read(int fd, void *buf, int size);
 int tfs_write(int fd, void *buf, int size);
 
 int tfs_get_size(int fd);
+
+int tfs_cat(int fd);

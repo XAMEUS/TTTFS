@@ -18,7 +18,6 @@ int tfs_cp_disk_disk(int fd1, int fd2)
 
 int tfs_cp_host_disk(int fd1, int fd2)
 {
-	printf("cp_host_disk\n");
 	char buf[1024];
 	int i;
 	struct stat st;
@@ -46,48 +45,6 @@ int tfs_cp_disk_host(int fd1, int fd2)
 	}
 	return 0;
 }
-
-char **str_split(char *s, const char *ct)
-{
-   char **tab = NULL;
- 
-   if (s && ct)
-   {
-      int i;
-      char *cs = NULL;
-      size_t size = 1;
- 
-/* (1) */
-      for (i = 0; (cs = strtok (s, ct)); i++)
-      {
-         if (size <= i + 1)
-         {
-            void *tmp = NULL;
- 
-/* (2) */
-            size <<= 1;
-            tmp = realloc (tab, sizeof (*tab) * size);
-            if (tmp)
-            {
-               tab = tmp;
-            }
-            else
-            {
-               fprintf (stderr, "Memoire insuffisante\n");
-               free (tab);
-               tab = NULL;
-               exit (EXIT_FAILURE);
-            }
-         }
-/* (3) */
-         tab[i] = cs;
-         s = NULL;
-      }
-      tab[i] = NULL;
-   }
-   return tab;
-}
-
 
 int main(int argc, char* argv[])
 {
@@ -190,7 +147,6 @@ int main(int argc, char* argv[])
 		fd2 = tfs_open(dk2, par, path2_location, name, CREATE|WRITE);
 	}
 	
-	printf("%s\n%s\n", path1_location, path2_location);
 	if (flag1 && flag2)
 	{
 		return 1;

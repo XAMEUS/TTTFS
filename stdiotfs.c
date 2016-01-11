@@ -297,12 +297,9 @@ int tfs_read(int fd, void *buf, int size)
     {
         read_block(f->disk, dblock, f->disk.pos_partition[f->par] + read_uint32_t(file_table, (f->id%16)*16 + 3 + i));
 		int k;
-		if (i == f->pos / 1024) k = f->pos % 1024;
-		else k = 0;
-		for (; k < 1024 && count < size; k++)
+		for (k = 0; k < 1024 && count < size; k++)
 		{
-			memcpy(buf + count, dblock->data + k + i * 1024, 1);
-			//buf[count] = dblock[k + i * 1024];
+			memcpy(buf + count, dblock->data + k, 1);
 			count++;
 		}
     }
@@ -319,12 +316,9 @@ int tfs_read(int fd, void *buf, int size)
 		{
 		    read_block(f->disk, dblock, f->disk.pos_partition[f->par] + read_uint32_t(indirect1, i));
 			int k;
-			if (i == f->pos / 1024) k = f->pos % 1024;
-			else k = 0;
-			for (; k < 1024 && count < size; k++)
+			for (k = 0; k < 1024 && count < size; k++)
 			{
-				memcpy(buf + count + c, dblock->data + k + (i + 10) * 1024, 1);
-				//buf[count + c] = dblock[k + (i + 10) * 1024];
+				memcpy(buf + count + c, dblock->data + k, 1);
 				count++;
 			}
 		}
@@ -350,12 +344,9 @@ int tfs_read(int fd, void *buf, int size)
 			{
 				read_block(f->disk, dblock, f->disk.pos_partition[f->par] + read_uint32_t(indirect1, j));
 				int k;
-				if (i == f->pos / 1024 / 256) k = f->pos % 1024;
-				else k = 0;
-				for (; k < 1024 && count < size; k++)
+				for (k = 0; k < 1024 && count < size; k++)
 				{
-					memcpy(buf + count + c, dblock->data + k + (i * 256 + 266) * 1024, 1);
-					//buf[count + c] = dblock[k + (i * 256 + 266) * 1024];
+					memcpy(buf + count + c, dblock->data + k, 1);
 					count++;
 				}
 			}
@@ -385,11 +376,9 @@ int tfs_write(int fd, void *buf, int size)
     {
         read_block(f->disk, dblock, f->disk.pos_partition[f->par] + read_uint32_t(file_table, (f->id%16)*16 + 3 + i));
 		int k;
-		if (i == f->pos / 1024) k = f->pos % 1024;
-		else k = 0;
-		for (; k < 1024 && count < size; k++)
+		for (k = 0; k < 1024 && count < size; k++)
 		{
-			memcpy(dblock->data + k + i * 1024, buf + count, 1);
+			memcpy(dblock->data + k, buf + count, 1);
 			count++;
 		}
         write_block(f->disk, dblock, f->disk.pos_partition[f->par] + read_uint32_t(file_table, (f->id%16)*16 + 3 + i));
@@ -407,11 +396,9 @@ int tfs_write(int fd, void *buf, int size)
 		{
 		    read_block(f->disk, dblock, f->disk.pos_partition[f->par] + read_uint32_t(indirect1, i));
 			int k;
-			if (i == f->pos / 1024) k = f->pos % 1024;
-			else k = 0;
-			for (; k < 1024 && count < size; k++)
+			for (k = 0; k < 1024 && count < size; k++)
 			{
-				memcpy(dblock->data + k + (i + 10) * 1024, buf + count + c, 1);
+				memcpy(dblock->data + k, buf + count + c, 1);
 				count++;
 			}
 		    write_block(f->disk, dblock, f->disk.pos_partition[f->par] + read_uint32_t(indirect1, i));
@@ -438,11 +425,9 @@ int tfs_write(int fd, void *buf, int size)
 			{
 				read_block(f->disk, dblock, f->disk.pos_partition[f->par] + read_uint32_t(indirect1, j));
 				int k;
-				if (i == f->pos / 1024 / 256) k = f->pos % 1024;
-				else k = 0;
-				for (; k < 1024 && count < size; k++)
+				for (k = 0; k < 1024 && count < size; k++)
 				{
-					memcpy(dblock->data + k + (i * 256 + 266) * 1024, buf + count + c, 1);
+					memcpy(dblock->data + k, buf + count + c, 1);
 					count++;
 				}
 				write_block(f->disk, dblock, f->disk.pos_partition[f->par] + read_uint32_t(indirect1, j));
@@ -468,7 +453,9 @@ int tfs_cat(int fd1)
 		int s = tfs_get_size(fd1) - i*1024;
 		if (s > 1024) s = 1024;
 		tfs_read(fd1, buf, s);
-		printf("%s", buf);
+		char buf2[s];
+		memcpy(buf2, buf, s);
+		printf("%s", buf2);
 	}
 	printf("\n");
 	return 0;

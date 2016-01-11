@@ -290,6 +290,8 @@ error add_blocks_file(disk_id id, uint32_t par, uint32_t file, uint32_t nblocks)
 			}
 		}
 	}
+	
+	write_block(id, file_table, id.pos_partition[par] + file / 16 + 1);
 	return 0;
 }
 

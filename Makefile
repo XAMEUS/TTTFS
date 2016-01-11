@@ -45,7 +45,7 @@ od:
 
 clean:
 	rm -f $(OBJECTS)
-	rm tfs_create tfs_partition tfs_analyse tfs_format
+	rm tfs_create tfs_partition tfs_analyse tfs_format tfs_cp tfs_mkdir tfs_rm tfs_cat
 	rm disk.tfs
 
 mrproper: clean
